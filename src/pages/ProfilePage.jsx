@@ -8,6 +8,7 @@ import { getFollowers, getFollowing, followUser, unfollowUser, isFollowing } fro
 import EmptyState from "../components/ui/EmptyState";
 import { Skeleton, SkeletonText } from "../components/ui/Skeleton";
 import { getUserLists } from "../services/lists";
+import { bookCoverUrl } from "../utils/formatters";
 import { VISIBILITY_OPTIONS } from "../utils/constants";
 import { useReadingGoal } from "../hooks/useReadingGoals";
 import { useReadingStreak } from "../hooks/useReadingStreak";
@@ -346,8 +347,8 @@ function ProfilePage() {
           <div className="profile-recent-grid">
             {logs.slice(0, 8).map((log) => (
               <Link to={`/book/${log.book_id}`} key={log.id} className="profile-recent-item">
-                {log.books?.cover_url ? (
-                  <img src={log.books.cover_url} alt="" className="profile-recent-cover" referrerPolicy="no-referrer" />
+                {(log.books?.cover_url || log.books?.google_books_id) ? (
+                  <img src={bookCoverUrl(log.books)} alt="" className="profile-recent-cover" referrerPolicy="no-referrer" />
                 ) : null}
                 <span className="profile-recent-rating">{log.rating}/10</span>
               </Link>

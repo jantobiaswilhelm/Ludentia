@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabaseClient";
+import { backfillCover } from "./bookCache";
 
 export async function getRecommendations(userId, limit = 20) {
   if (!supabase) return [];
@@ -78,19 +79,17 @@ export async function getSimilarBooks(bookId, limit = 8) {
   const tagMap = {};
   for (const td of tagDefs || []) tagMap[td.id] = td;
 
-  return data.map((rec) => {
+  const results = data.map((rec) => {
     const book = (books || []).find((b) => b.id === rec.book_id);
     if (!book) return null;
     return {
-      id: book.id,
-      title: book.title,
-      authors: book.authors || [],
-      coverUrl: book.cover_url,
-      coverUrlLarge: book.cover_url_large,
+      ...book,
       sharedTags: (rec.shared_tag_ids || []).map((id) => tagMap[id]).filter(Boolean),
       sharedTagIds: rec.shared_tag_ids,
     };
   }).filter(Boolean);
+
+  return Promise.all(results.map((b) => backfillCover(b)));
 }
 
 export async function getHighlyRatedBooks(limit = 12) {

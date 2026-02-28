@@ -8,6 +8,7 @@ import SearchBar from "../components/search/SearchBar";
 import useBookSearch from "../hooks/useBookSearch";
 import { useAuth } from "../context/AuthContext";
 import { getRecommendations, getTrendingBooks } from "../services/recommendations";
+import { backfillCover } from "../services/bookCache";
 import { getOfficialTags } from "../services/tags";
 import { TAG_COLORS } from "../utils/constants";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
@@ -40,37 +41,17 @@ function HomePage() {
     if (user) {
       setRecsLoading(true);
       getRecommendations(user.id, 12)
-        .then((data) =>
-          setRecs(
-            data
-              .filter((r) => r.book)
-              .map((r) => ({
-                id: r.book.id,
-                title: r.book.title,
-                authors: r.book.authors || [],
-                coverUrl: r.book.cover_url,
-                coverUrlLarge: r.book.cover_url_large,
-                pageCount: r.book.page_count,
-                averageRating: r.book.google_average_rating,
-                reason: r.reason,
-              }))
-          )
-        )
+        .then(async (data) => {
+          const filtered = data.filter((r) => r.book);
+          const filled = await Promise.all(filtered.map((r) => backfillCover(r.book)));
+          setRecs(filtered.map((r, i) => ({ ...filled[i], reason: r.reason })));
+        })
         .finally(() => setRecsLoading(false));
     } else {
-      getTrendingBooks(8).then((data) =>
-        setTrending(
-          data.map((b) => ({
-            id: b.id,
-            title: b.title,
-            authors: b.authors || [],
-            coverUrl: b.cover_url,
-            coverUrlLarge: b.cover_url_large,
-            pageCount: b.page_count,
-            averageRating: b.google_average_rating,
-          }))
-        )
-      );
+      getTrendingBooks(8).then(async (data) => {
+        const filled = await Promise.all(data.map((b) => backfillCover(b)));
+        setTrending(filled);
+      });
     }
   }, [user]);
 

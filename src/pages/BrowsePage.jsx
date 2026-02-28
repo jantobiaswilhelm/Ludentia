@@ -7,6 +7,7 @@ import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 import { TAG_COLORS } from "../utils/constants";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { backfillCover } from "../services/bookCache";
 
 function BrowsePage() {
   const [mode, setMode] = useState("guided");
@@ -31,24 +32,17 @@ function BrowsePage() {
       .from("tag_votes")
       .select("book_id, books(*)")
       .eq("tag_id", selectedTag.id)
-      .then(({ data }) => {
+      .then(async ({ data }) => {
         const seen = new Set();
-        const unique = [];
+        const rawBooks = [];
         for (const row of data || []) {
           if (row.books && !seen.has(row.book_id)) {
             seen.add(row.book_id);
-            unique.push({
-              id: row.books.id,
-              title: row.books.title,
-              authors: row.books.authors || [],
-              coverUrl: row.books.cover_url,
-              coverUrlLarge: row.books.cover_url_large,
-              pageCount: row.books.page_count,
-              averageRating: row.books.google_average_rating,
-            });
+            rawBooks.push(row.books);
           }
         }
-        setBooks(unique);
+        const filled = await Promise.all(rawBooks.map((b) => backfillCover(b)));
+        setBooks(filled);
         setLoading(false);
       });
   }, [selectedTag]);

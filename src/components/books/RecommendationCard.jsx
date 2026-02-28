@@ -9,7 +9,7 @@ function RecommendationCard({ book, reason }) {
   return (
     <div className="rec-card">
       <Link to={`/book/${book.id}`} className="book-card">
-        <BookCover title={book.title} coverUrl={book.coverUrlLarge || book.coverUrl} />
+        <BookCover title={book.title} coverUrl={book.cover_url_large || book.cover_url} />
         <div className="book-body">
           <h3>{book.title}</h3>
           <p>{(book.authors || []).join(", ")}</p>

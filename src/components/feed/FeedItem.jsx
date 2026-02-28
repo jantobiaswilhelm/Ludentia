@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { formatRelativeDate, truncate } from "../../utils/formatters";
+import { formatRelativeDate, truncate, bookCoverUrl } from "../../utils/formatters";
 
 const SHELF_LABELS = {
   want_to_read: "Want to Read",
@@ -81,9 +81,9 @@ function FeedItem({ event }) {
           <span className="feed-item-time">{formatRelativeDate(created_at)}</span>
         </div>
         <div className="feed-item-body">
-          {book?.cover_url ? (
+          {(book?.cover_url || book?.google_books_id) ? (
             <Link to={`/book/${book.id}`}>
-              <img src={book.cover_url} alt="" className="feed-item-cover" referrerPolicy="no-referrer" />
+              <img src={bookCoverUrl(book)} alt="" className="feed-item-cover" referrerPolicy="no-referrer" />
             </Link>
           ) : null}
           <div className="feed-item-detail">{content}</div>

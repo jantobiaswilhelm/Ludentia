@@ -6,6 +6,7 @@ import { deleteList, updateList } from "../services/lists";
 import EmptyState from "../components/ui/EmptyState";
 import Spinner from "../components/ui/Spinner";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { bookCoverUrl } from "../utils/formatters";
 
 function ListDetailPage() {
   const { listId } = useParams();
@@ -126,9 +127,9 @@ function ListDetailPage() {
           {items.map((item, index) => (
             <div key={item.id} className="list-item">
               {list.is_ranked ? <span className="list-item-rank">#{index + 1}</span> : null}
-              {item.books?.cover_url ? (
+              {(item.books?.cover_url || item.books?.google_books_id) ? (
                 <Link to={`/book/${item.book_id}`}>
-                  <img src={item.books.cover_url} alt="" className="list-item-cover" referrerPolicy="no-referrer" />
+                  <img src={bookCoverUrl(item.books)} alt="" className="list-item-cover" referrerPolicy="no-referrer" />
                 </Link>
               ) : (
                 <div className="list-item-cover-placeholder" />

@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabaseClient";
+import { backfillCover } from "./bookCache";
 
 export async function discoverBooksByTags(tagIds, { limit = 20, offset = 0 } = {}) {
   if (!supabase || tagIds.length === 0) return [];
@@ -19,19 +20,11 @@ export async function discoverBooksByTags(tagIds, { limit = 20, offset = 0 } = {
     .select("*")
     .in("id", bookIds);
 
-  return data.map((rec) => {
+  const results = data.map((rec) => {
     const book = (books || []).find((b) => b.id === rec.book_id);
     if (!book) return null;
-    return {
-      id: book.id,
-      title: book.title,
-      authors: book.authors || [],
-      coverUrl: book.cover_url,
-      coverUrlLarge: book.cover_url_large,
-      pageCount: book.page_count,
-      averageRating: book.google_average_rating,
-      matchCount: rec.match_count,
-      matchedTags: rec.matched_tags,
-    };
+    return { ...book, matchCount: rec.match_count, matchedTags: rec.matched_tags };
   }).filter(Boolean);
+
+  return Promise.all(results.map((b) => backfillCover(b)));
 }

@@ -36,3 +36,8 @@ export function ratingToStars(rating) {
   // Convert 1-10 to display string
   return `${rating}/10`;
 }
+
+export function bookCoverUrl(book) {
+  if (!book) return "";
+  return book.cover_url_large || book.cover_url || "";
+}

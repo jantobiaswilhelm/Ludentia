@@ -1,9 +1,15 @@
-const FALLBACK_COVER = "https://via.placeholder.com/240x360/efe5d2/3a3122?text=No+Cover";
-
 function BookCover({ title, coverUrl }) {
+  if (!coverUrl) {
+    return (
+      <div className="book-cover book-cover-placeholder" role="img" aria-label={`${title} cover`}>
+        <span>{title}</span>
+      </div>
+    );
+  }
+
   return (
     <img
-      src={coverUrl || FALLBACK_COVER}
+      src={coverUrl}
       alt={`${title} cover`}
       loading="lazy"
       className="book-cover"

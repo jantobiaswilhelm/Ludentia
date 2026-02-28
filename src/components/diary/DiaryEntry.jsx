@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { formatRelativeDate } from "../../utils/formatters";
+import { formatRelativeDate, bookCoverUrl } from "../../utils/formatters";
 
 function DiaryEntry({ entry, showBook, onDelete }) {
   const [revealed, setRevealed] = useState(false);
@@ -8,9 +8,9 @@ function DiaryEntry({ entry, showBook, onDelete }) {
     <article className="diary-entry">
       {showBook && entry.books ? (
         <div className="diary-entry-book">
-          {entry.books.cover_url ? (
+          {(entry.books.cover_url || entry.books.google_books_id) ? (
             <img
-              src={entry.books.cover_url}
+              src={bookCoverUrl(entry.books)}
               alt=""
               className="diary-entry-thumb"
               referrerPolicy="no-referrer"

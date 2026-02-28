@@ -6,6 +6,7 @@ import RecommendationCard from "../components/books/RecommendationCard";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import { backfillCover } from "../services/bookCache";
 
 function RecommendationsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -17,22 +18,10 @@ function RecommendationsPage() {
     if (!user) return;
     setLoading(true);
     getRecommendations(user.id)
-      .then((data) => {
-        setRecs(
-          data
-            .filter((r) => r.book)
-            .map((r) => ({
-              id: r.book.id,
-              title: r.book.title,
-              authors: r.book.authors || [],
-              coverUrl: r.book.cover_url,
-              coverUrlLarge: r.book.cover_url_large,
-              pageCount: r.book.page_count,
-              averageRating: r.book.google_average_rating,
-              score: r.score,
-              reason: r.reason,
-            }))
-        );
+      .then(async (data) => {
+        const filtered = data.filter((r) => r.book);
+        const filled = await Promise.all(filtered.map((r) => backfillCover(r.book)));
+        setRecs(filtered.map((r, i) => ({ ...filled[i], score: r.score, reason: r.reason })));
       })
       .finally(() => setLoading(false));
   }, [user]);

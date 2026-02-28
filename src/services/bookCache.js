@@ -1,6 +1,35 @@
 import { supabase } from "../config/supabaseClient";
 
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const GOOGLE_BOOKS_BASE_URL = "https://www.googleapis.com/books/v1/volumes";
+
+function toHttps(url) {
+  return typeof url === "string" ? url.replace("http://", "https://") : "";
+}
+
+export async function backfillCover(book) {
+  if (!book || book.cover_url) return book;
+  try {
+    const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+    const author = (book.authors || [])[0] || "";
+    const q = author ? `${book.title} inauthor:${author}` : book.title;
+    const params = new URLSearchParams({ q, maxResults: "1", printType: "books" });
+    if (apiKey) params.append("key", apiKey);
+    const res = await fetch(`${GOOGLE_BOOKS_BASE_URL}?${params}`);
+    if (!res.ok) return book;
+    const data = await res.json();
+    const item = data.items?.[0];
+    if (!item) return book;
+    const links = item.volumeInfo?.imageLinks ?? {};
+    const cover_url = toHttps(links.thumbnail || links.smallThumbnail) || "";
+    const cover_url_large = toHttps(links.large || links.medium || links.thumbnail) || "";
+    if (cover_url) {
+      await supabase.from("books").update({ cover_url, cover_url_large }).eq("id", book.id);
+      return { ...book, cover_url, cover_url_large };
+    }
+  } catch {}
+  return book;
+}
 
 export async function getCachedBook(googleBooksId) {
   if (!supabase) return null;
@@ -20,6 +49,8 @@ const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
 export async function getCachedBookById(bookId) {
   if (!supabase || !bookId) return null;
 
+  let book = null;
+
   // Only query UUID column if it looks like a UUID
   if (UUID_RE.test(bookId)) {
     const { data } = await supabase
@@ -27,24 +58,30 @@ export async function getCachedBookById(bookId) {
       .select("*")
       .eq("id", bookId)
       .maybeSingle();
-    if (data) return data;
+    if (data) book = data;
   }
 
-  // Try Google Books ID
-  const { data: byGoogle } = await supabase
-    .from("books")
-    .select("*")
-    .eq("google_books_id", bookId)
-    .maybeSingle();
-  if (byGoogle) return byGoogle;
+  if (!book) {
+    // Try Google Books ID
+    const { data: byGoogle } = await supabase
+      .from("books")
+      .select("*")
+      .eq("google_books_id", bookId)
+      .maybeSingle();
+    if (byGoogle) book = byGoogle;
+  }
 
-  // Try Open Library key
-  const { data: byOL } = await supabase
-    .from("books")
-    .select("*")
-    .eq("open_library_key", bookId)
-    .maybeSingle();
-  return byOL;
+  if (!book) {
+    // Try Open Library key
+    const { data: byOL } = await supabase
+      .from("books")
+      .select("*")
+      .eq("open_library_key", bookId)
+      .maybeSingle();
+    book = byOL;
+  }
+
+  return backfillCover(book);
 }
 
 export async function cacheBook(normalizedBook) {

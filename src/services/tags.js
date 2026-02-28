@@ -1,4 +1,5 @@
 import { supabase } from "../config/supabaseClient";
+import { backfillCover } from "./bookCache";
 
 export async function getAllTags() {
   if (!supabase) return [];
@@ -138,19 +139,12 @@ export async function getBooksForTag(tagId, limit = 50) {
     counts[row.book_id].voteCount++;
   }
 
-  return Object.values(counts)
+  const sorted = Object.values(counts)
     .sort((a, b) => b.voteCount - a.voteCount)
     .slice(0, limit)
-    .map((c) => ({
-      id: c.book.id,
-      title: c.book.title,
-      authors: c.book.authors || [],
-      coverUrl: c.book.cover_url,
-      coverUrlLarge: c.book.cover_url_large,
-      pageCount: c.book.page_count,
-      averageRating: c.book.google_average_rating,
-      voteCount: c.voteCount,
-    }));
+    .map((c) => ({ ...c.book, voteCount: c.voteCount }));
+
+  return Promise.all(sorted.map((b) => backfillCover(b)));
 }
 
 export async function getCoOccurringTags(tagId, limit = 8) {

@@ -19,7 +19,7 @@ export async function getActivityFeed(userId, { limit = 20, before = null } = {}
 
   const [booksResult, profilesResult] = await Promise.all([
     bookIds.length > 0
-      ? supabase.from("books").select("id, title, cover_url, authors").in("id", bookIds)
+      ? supabase.from("books").select("id, title, cover_url, cover_url_large, google_books_id, authors").in("id", bookIds)
       : { data: [] },
     userIds.length > 0
       ? supabase.from("profiles").select("id, username, display_name, avatar_url").in("id", userIds)

@@ -33,7 +33,7 @@ function SimilarBooks({ bookId }) {
       <div className="similar-books-scroll">
         {books.map((book) => (
           <Link key={book.id} to={`/book/${book.id}`} className="similar-book-item">
-            <BookCover title={book.title} coverUrl={book.coverUrlLarge || book.coverUrl} />
+            <BookCover title={book.title} coverUrl={book.cover_url_large || book.cover_url} />
             <div className="similar-book-title">{book.title}</div>
             {book.sharedTags.length > 0 ? (
               <div className="similar-book-chips">

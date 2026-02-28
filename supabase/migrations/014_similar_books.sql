@@ -11,9 +11,9 @@ returns table (
 begin
   return query
   with source_tags as (
-    select distinct tag_id
-    from tag_votes
-    where book_id = p_book_id
+    select distinct tv0.tag_id
+    from tag_votes tv0
+    where tv0.book_id = p_book_id
   )
   select
     tv.book_id,
