@@ -501,7 +501,7 @@ $$ language plpgsql stable;
 -- ─── 011: Open Library Unique Constraint ────────────────────────────────────
 DO $$ BEGIN
   ALTER TABLE books ADD CONSTRAINT books_open_library_key_unique UNIQUE (open_library_key);
-EXCEPTION WHEN duplicate_object THEN NULL;
+EXCEPTION WHEN duplicate_table OR duplicate_object THEN NULL;
 END $$;
 
 -- ─── 012: Refresh Tag Counts ────────────────────────────────────────────────
