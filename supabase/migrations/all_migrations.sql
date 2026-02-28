@@ -1051,17 +1051,19 @@ END;
 $$;
 
 -- ─── 023: Full-Text Search ──────────────────────────────────────────────────
--- Immutable wrapper needed for generated columns (to_tsvector is STABLE, not IMMUTABLE)
-CREATE OR REPLACE FUNCTION immutable_to_tsvector(config regconfig, input text)
-RETURNS tsvector AS $$ SELECT to_tsvector(config, input) $$ LANGUAGE sql IMMUTABLE;
+-- Wrap entire FTS expression in one immutable function (to_tsvector + regconfig cast are STABLE)
+CREATE OR REPLACE FUNCTION books_fts_vector(
+  p_title text, p_authors text[], p_categories text[], p_description text
+) RETURNS tsvector AS $$
+  SELECT
+    setweight(to_tsvector('english', coalesce(p_title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(p_authors, ' '), '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(p_categories, ' '), '')), 'C') ||
+    setweight(to_tsvector('english', coalesce(p_description, '')), 'D')
+$$ LANGUAGE sql IMMUTABLE;
 
 ALTER TABLE books ADD COLUMN IF NOT EXISTS fts tsvector
-  GENERATED ALWAYS AS (
-    setweight(immutable_to_tsvector('english'::regconfig, coalesce(title, '')), 'A') ||
-    setweight(immutable_to_tsvector('english'::regconfig, coalesce(array_to_string(authors, ' '), '')), 'B') ||
-    setweight(immutable_to_tsvector('english'::regconfig, coalesce(array_to_string(categories, ' '), '')), 'C') ||
-    setweight(immutable_to_tsvector('english'::regconfig, coalesce(description, '')), 'D')
-  ) STORED;
+  GENERATED ALWAYS AS (books_fts_vector(title, authors, categories, description)) STORED;
 
 CREATE INDEX IF NOT EXISTS idx_books_fts ON books USING GIN(fts);
 CREATE INDEX IF NOT EXISTS idx_books_categories ON books USING GIN(categories);
