@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 const LANGUAGES = [
   { code: "", label: "All Languages" },
   { code: "en", label: "English" },
@@ -43,7 +45,10 @@ function SearchBar({ value, onChange, language, onLanguageChange }) {
           </select>
         </div>
       </div>
-      <p className="search-help">Type at least 2 characters.</p>
+      <div className="search-help-row">
+        <p className="search-help">Type at least 2 characters.</p>
+        <Link to="/search" className="search-advanced-link">Advanced Search</Link>
+      </div>
     </div>
   );
 }

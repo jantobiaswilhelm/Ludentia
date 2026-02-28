@@ -6,6 +6,7 @@ import GuidedDiscovery from "../components/discovery/GuidedDiscovery";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 import { TAG_COLORS } from "../utils/constants";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 function BrowsePage() {
   const [mode, setMode] = useState("guided");
@@ -14,6 +15,7 @@ function BrowsePage() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tagsLoading, setTagsLoading] = useState(true);
+  useDocumentTitle("Browse");
 
   useEffect(() => {
     getAllTags().then((t) => {

@@ -5,11 +5,13 @@ import { getRecommendations } from "../services/recommendations";
 import RecommendationCard from "../components/books/RecommendationCard";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 function RecommendationsPage() {
   const { user, loading: authLoading } = useAuth();
   const [recs, setRecs] = useState([]);
   const [loading, setLoading] = useState(false);
+  useDocumentTitle("Recommendations");
 
   useEffect(() => {
     if (!user) return;

@@ -5,12 +5,14 @@ import ShelfList from "../components/shelves/ShelfList";
 import EmptyState from "../components/ui/EmptyState";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import { SHELVES, SHELF_ORDER } from "../utils/constants";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { Link } from "react-router-dom";
 
 function MyShelfPage() {
   const { user, loading: authLoading } = useAuth();
   const { shelves, loading, byShelf } = useUserShelves();
   const [activeTab, setActiveTab] = useState("all");
+  useDocumentTitle("My Shelf");
 
   if (authLoading || loading) {
     return (

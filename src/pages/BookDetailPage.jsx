@@ -17,8 +17,12 @@ import DiaryFeed from "../components/diary/DiaryFeed";
 import ProgressTracker from "../components/diary/ProgressTracker";
 import MoodSelector from "../components/diary/MoodSelector";
 import LogBookModal from "../components/logging/LogBookModal";
+import AddToListModal from "../components/lists/AddToListModal";
+import { useDiscussions } from "../hooks/useDiscussions";
+import DiscussionThread from "../components/discussions/DiscussionThread";
 import EmptyState from "../components/ui/EmptyState";
 import { Skeleton, SkeletonText } from "../components/ui/Skeleton";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 import { formatDate, truncate } from "../utils/formatters";
 
 function BookDetailPage() {
@@ -28,6 +32,7 @@ function BookDetailPage() {
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showLogModal, setShowLogModal] = useState(false);
+  const [showListModal, setShowListModal] = useState(false);
   const [descExpanded, setDescExpanded] = useState(false);
   const [diaryText, setDiaryText] = useState("");
   const [diaryPage, setDiaryPage] = useState("");
@@ -41,6 +46,8 @@ function BookDetailPage() {
   const { tagCounts, userVotes, officialTags, toggleVote, refresh: refreshTags } = useBookTags(bookId);
   const { entries: diaryEntries, addEntry, removeEntry, refresh: refreshDiary } = useBookDiary(bookId);
   const { progress, update: updateProgress } = useReadingProgress(bookId);
+  const { discussions, loading: discLoading, hasMore, page: discPage, setPage: setDiscPage, postComment, removeComment } = useDiscussions(bookId);
+  useDocumentTitle(book?.title || "Book Details");
 
   const loadBook = useCallback(async () => {
     setLoading(true);
@@ -158,14 +165,25 @@ function BookDetailPage() {
             />
           ) : null}
 
-          {user && shelfEntry?.shelf !== "read" ? (
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => setShowLogModal(true)}
-            >
-              Log this book
-            </button>
+          {user ? (
+            <div className="book-detail-action-row">
+              {shelfEntry?.shelf !== "read" ? (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => setShowLogModal(true)}
+                >
+                  Log this book
+                </button>
+              ) : null}
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => setShowListModal(true)}
+              >
+                Add to List
+              </button>
+            </div>
           ) : null}
         </div>
       </div>
@@ -310,6 +328,20 @@ function BookDetailPage() {
         />
       </section>
 
+      {/* Discussion */}
+      <section className="book-section">
+        <h2>Discussion</h2>
+        <DiscussionThread
+          discussions={discussions}
+          loading={discLoading}
+          hasMore={hasMore}
+          page={discPage}
+          setPage={setDiscPage}
+          postComment={postComment}
+          removeComment={removeComment}
+        />
+      </section>
+
       <LogBookModal
         open={showLogModal}
         onClose={() => setShowLogModal(false)}
@@ -318,6 +350,11 @@ function BookDetailPage() {
           refreshReviews();
           refreshTags();
         }}
+      />
+      <AddToListModal
+        open={showListModal}
+        onClose={() => setShowListModal(false)}
+        bookId={bookId}
       />
     </div>
   );

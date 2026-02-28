@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { signIn, signInWithGoogle } from "../services/auth";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -8,6 +9,7 @@ function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  useDocumentTitle("Log In");
 
   const handleSubmit = async (e) => {
     e.preventDefault();

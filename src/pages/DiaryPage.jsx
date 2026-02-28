@@ -5,11 +5,13 @@ import { useUserDiary } from "../hooks/useDiary";
 import DiaryFeed from "../components/diary/DiaryFeed";
 import EmptyState from "../components/ui/EmptyState";
 import Spinner from "../components/ui/Spinner";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 function DiaryPage() {
   const { user, loading: authLoading } = useAuth();
   const { entries, loading, refresh } = useUserDiary();
   const [filterBook, setFilterBook] = useState("");
+  useDocumentTitle("Diary");
 
   if (authLoading || loading) {
     return (

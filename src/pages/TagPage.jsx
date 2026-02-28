@@ -5,6 +5,7 @@ import BookGrid from "../components/books/BookGrid";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 import { TAG_COLORS } from "../utils/constants";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 function TagPage() {
   const { slug } = useParams();
@@ -12,6 +13,7 @@ function TagPage() {
   const [books, setBooks] = useState([]);
   const [coTags, setCoTags] = useState([]);
   const [loading, setLoading] = useState(true);
+  useDocumentTitle(tag?.label || "Tag");
 
   useEffect(() => {
     setLoading(true);

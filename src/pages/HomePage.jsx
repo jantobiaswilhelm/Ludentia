@@ -10,6 +10,11 @@ import { getRecommendations, getTrendingBooks } from "../services/recommendation
 import { getOfficialTags } from "../services/tags";
 import { TAG_COLORS } from "../utils/constants";
 import { SkeletonBookGrid } from "../components/ui/Skeleton";
+import { useReadingGoal } from "../hooks/useReadingGoals";
+import { useReadingStreak } from "../hooks/useReadingStreak";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
+import GoalProgress from "../components/goals/GoalProgress";
+import StreakBadge from "../components/streaks/StreakBadge";
 
 function HomePage() {
   const [query, setQuery] = useState("");
@@ -20,6 +25,9 @@ function HomePage() {
   const [trending, setTrending] = useState([]);
   const [popularTags, setPopularTags] = useState([]);
   const [recsLoading, setRecsLoading] = useState(false);
+  const { goalData } = useReadingGoal(user?.id);
+  const { streak } = useReadingStreak(user?.id);
+  useDocumentTitle("Home");
 
   useEffect(() => {
     getOfficialTags().then((tags) => setPopularTags(tags.slice(0, 12)));
@@ -64,9 +72,17 @@ function HomePage() {
     <div className="home-page">
       {/* Logged-in greeting or Hero panel */}
       {user ? (
-        <p className="home-greeting">
-          Welcome back, {profile?.display_name || profile?.username || "reader"}
-        </p>
+        <>
+          <p className="home-greeting">
+            Welcome back, {profile?.display_name || profile?.username || "reader"}
+          </p>
+          {(goalData?.goal || streak) ? (
+            <div className="home-engagement-row">
+              {goalData?.goal ? <GoalProgress goalData={goalData} compact /> : null}
+              {streak ? <StreakBadge streak={streak} compact /> : null}
+            </div>
+          ) : null}
+        </>
       ) : (
         <section className="hero-panel">
           <p className="eyebrow">Your reading companion</p>

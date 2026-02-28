@@ -15,13 +15,22 @@ function BottomTabBar() {
           <span>Discover</span>
         </NavLink>
 
-        <NavLink to="/browse" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="8.5" cy="8.5" r="5.5" />
-            <path d="M12.5 12.5L17 17" />
-          </svg>
-          <span>Browse</span>
-        </NavLink>
+        {user ? (
+          <NavLink to="/feed" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 4h14M3 8h10M3 12h14M3 16h8" />
+            </svg>
+            <span>Feed</span>
+          </NavLink>
+        ) : (
+          <NavLink to="/browse" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="8.5" cy="8.5" r="5.5" />
+              <path d="M12.5 12.5L17 17" />
+            </svg>
+            <span>Browse</span>
+          </NavLink>
+        )}
 
         {user ? (
           <NavLink to="/shelf" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>

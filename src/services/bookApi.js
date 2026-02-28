@@ -149,6 +149,45 @@ export async function searchOpenLibrary(query, { limit = 24, language } = {}) {
   return withIds;
 }
 
+export async function searchGoogleBooksAdvanced(query, { author, subject, isbn, maxResults = 24, language = "en" } = {}) {
+  const parts = [];
+  if (query?.trim()) parts.push(query.trim());
+  if (author?.trim()) parts.push(`inauthor:${author.trim()}`);
+  if (subject?.trim()) parts.push(`subject:${subject.trim()}`);
+  if (isbn?.trim()) parts.push(`isbn:${isbn.trim()}`);
+
+  const fullQuery = parts.join(" ");
+  if (!fullQuery) return [];
+
+  const apiKey = import.meta.env.VITE_GOOGLE_BOOKS_API_KEY;
+  const params = new URLSearchParams({
+    q: fullQuery,
+    maxResults: String(maxResults),
+    printType: "books",
+  });
+  if (language) params.append("langRestrict", language);
+  if (apiKey) params.append("key", apiKey);
+
+  const response = await fetch(`${GOOGLE_BOOKS_BASE_URL}?${params.toString()}`);
+  if (!response.ok) throw new Error("Google Books request failed.");
+
+  const data = await response.json();
+  const items = Array.isArray(data.items) ? data.items : [];
+  const normalized = items.map(normalizeGoogleBook);
+
+  const withIds = await Promise.all(
+    normalized.map(async (book) => {
+      try {
+        const cached = await ensureBookCached(book);
+        if (cached) return { ...book, id: cached.id };
+      } catch {}
+      return book;
+    })
+  );
+
+  return withIds;
+}
+
 // Combined search: Open Library primary, Google Books fallback
 export async function searchBooks(query, { maxResults = 24, language = "" } = {}) {
   try {
