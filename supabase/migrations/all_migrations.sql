@@ -675,6 +675,18 @@ end;
 $$ language plpgsql stable;
 
 -- ─── 018: Seed Popular Books ────────────────────────────────────────────────
+-- Create system user in auth.users so the profiles FK is satisfied
+INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at, confirmation_token, raw_app_meta_data, raw_user_meta_data)
+VALUES (
+  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-0000-0000-000000000000',
+  'authenticated', 'authenticated',
+  'system@ludentia.app', '',
+  now(), now(), now(), '',
+  '{"provider":"email","providers":["email"]}',
+  '{"username":"ludentia-system","display_name":"Ludentia"}'
+) ON CONFLICT (id) DO NOTHING;
+
 insert into profiles (id, username, display_name)
 values ('00000000-0000-0000-0000-000000000001', 'ludentia-system', 'Ludentia')
 on conflict (id) do nothing;
