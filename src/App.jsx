@@ -1,0 +1,39 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Navbar from "./components/layout/Navbar";
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import SignUpPage from "./pages/SignUpPage";
+import BookDetailPage from "./pages/BookDetailPage";
+import MyShelfPage from "./pages/MyShelfPage";
+import DiaryPage from "./pages/DiaryPage";
+import BrowsePage from "./pages/BrowsePage";
+import RecommendationsPage from "./pages/RecommendationsPage";
+import ProfilePage from "./pages/ProfilePage";
+
+function App() {
+  return (
+    <AuthProvider>
+      <div className="app-shell">
+        <Navbar />
+        <main className="page-wrap">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+            <Route path="/book/:id/*" element={<BookDetailPage />} />
+            <Route path="/shelf" element={<MyShelfPage />} />
+            <Route path="/diary" element={<DiaryPage />} />
+            <Route path="/browse" element={<BrowsePage />} />
+            <Route path="/recommendations" element={<RecommendationsPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile/:userId" element={<ProfilePage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </AuthProvider>
+  );
+}
+
+export default App;

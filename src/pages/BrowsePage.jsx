@@ -1,0 +1,114 @@
+import { useEffect, useState } from "react";
+import { getAllTags, getBookTagCounts } from "../services/tags";
+import { supabase } from "../config/supabaseClient";
+import BookGrid from "../components/books/BookGrid";
+import Spinner from "../components/ui/Spinner";
+import EmptyState from "../components/ui/EmptyState";
+import { TAG_COLORS } from "../utils/constants";
+
+function BrowsePage() {
+  const [tags, setTags] = useState([]);
+  const [selectedTag, setSelectedTag] = useState(null);
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [tagsLoading, setTagsLoading] = useState(true);
+
+  useEffect(() => {
+    getAllTags().then((t) => {
+      setTags(t);
+      setTagsLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!selectedTag || !supabase) return;
+    setLoading(true);
+    supabase
+      .from("tag_votes")
+      .select("book_id, books(*)")
+      .eq("tag_id", selectedTag.id)
+      .then(({ data }) => {
+        const seen = new Set();
+        const unique = [];
+        for (const row of data || []) {
+          if (row.books && !seen.has(row.book_id)) {
+            seen.add(row.book_id);
+            // Normalize for BookCard compatibility
+            unique.push({
+              id: row.books.id,
+              title: row.books.title,
+              authors: row.books.authors || [],
+              coverUrl: row.books.cover_url,
+              coverUrlLarge: row.books.cover_url_large,
+              pageCount: row.books.page_count,
+              averageRating: row.books.google_average_rating,
+            });
+          }
+        }
+        setBooks(unique);
+        setLoading(false);
+      });
+  }, [selectedTag]);
+
+  // Group tags by category
+  const categories = {};
+  for (const tag of tags) {
+    const cat = tag.category || "Other";
+    if (!categories[cat]) categories[cat] = [];
+    categories[cat].push(tag);
+  }
+
+  return (
+    <div className="browse-page">
+      <h1>Browse by Tag</h1>
+
+      {tagsLoading ? (
+        <Spinner size={32} />
+      ) : (
+        <div className="browse-tags">
+          {Object.entries(categories).map(([category, catTags]) => (
+            <div key={category} className="browse-tag-group">
+              <h3>{category}</h3>
+              <div className="tag-list">
+                {catTags.map((tag) => {
+                  const colors = TAG_COLORS[tag.color] || TAG_COLORS.gray;
+                  const active = selectedTag?.id === tag.id;
+                  return (
+                    <button
+                      key={tag.id}
+                      type="button"
+                      className={`tag-badge ${active ? "tag-voted" : ""}`}
+                      style={{
+                        "--tag-bg": active ? colors.border : colors.bg,
+                        "--tag-text": colors.text,
+                        "--tag-border": colors.border,
+                      }}
+                      onClick={() => setSelectedTag(active ? null : tag)}
+                    >
+                      {tag.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {selectedTag ? (
+        <div className="browse-results">
+          <h2>Books tagged "{selectedTag.label}"</h2>
+          {loading ? (
+            <Spinner size={32} />
+          ) : books.length === 0 ? (
+            <EmptyState title="No books yet" description="Be the first to tag a book with this!" />
+          ) : (
+            <BookGrid books={books} />
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export default BrowsePage;

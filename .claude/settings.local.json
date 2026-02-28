@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:developers.google.com)",
+      "WebFetch(domain:openlibrary.org)",
+      "WebFetch(domain:isbndb.com)",
+      "WebFetch(domain:www.librarything.com)",
+      "WebFetch(domain:docs.hardcover.app)",
+      "WebFetch(domain:www.emgoto.com)",
+      "WebFetch(domain:wiki.librarything.com)",
+      "Bash(npm install:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
