@@ -7,6 +7,7 @@ import { useBookReviews } from "../hooks/useBookLog";
 import useBookTags from "../hooks/useBookTags";
 import { useBookDiary, useReadingProgress } from "../hooks/useDiary";
 import BookCover from "../components/books/BookCover";
+import SimilarBooks from "../components/books/SimilarBooks";
 import ShelfSelector from "../components/shelves/ShelfSelector";
 import RatingDisplay from "../components/ratings/RatingDisplay";
 import RatingDistribution from "../components/ratings/RatingDistribution";
@@ -17,7 +18,7 @@ import ProgressTracker from "../components/diary/ProgressTracker";
 import MoodSelector from "../components/diary/MoodSelector";
 import LogBookModal from "../components/logging/LogBookModal";
 import EmptyState from "../components/ui/EmptyState";
-import Spinner from "../components/ui/Spinner";
+import { Skeleton, SkeletonText } from "../components/ui/Skeleton";
 import { formatDate, truncate } from "../utils/formatters";
 
 function BookDetailPage() {
@@ -86,8 +87,17 @@ function BookDetailPage() {
 
   if (loading) {
     return (
-      <div className="page-center">
-        <Spinner size={40} />
+      <div className="book-detail-page">
+        <div className="book-detail-hero">
+          <div className="book-detail-cover">
+            <Skeleton height="360px" width="240px" />
+          </div>
+          <div className="book-detail-info">
+            <Skeleton height="2rem" width="70%" />
+            <Skeleton height="1.1rem" width="40%" />
+            <SkeletonText lines={3} />
+          </div>
+        </div>
       </div>
     );
   }
@@ -98,14 +108,23 @@ function BookDetailPage() {
 
   const desc = book.description || "";
   const longDesc = desc.length > 300;
+  const coverUrl = book.cover_url_large || book.cover_url;
 
   return (
     <div className="book-detail-page">
+      {/* Blurred cover backdrop */}
+      {coverUrl ? (
+        <div
+          className="book-detail-backdrop"
+          style={{ backgroundImage: `url(${coverUrl})` }}
+        />
+      ) : null}
+
       <div className="book-detail-hero">
         <div className="book-detail-cover">
           <BookCover
             title={book.title}
-            coverUrl={book.cover_url_large || book.cover_url}
+            coverUrl={coverUrl}
           />
         </div>
 
@@ -208,6 +227,9 @@ function BookDetailPage() {
           />
         )}
       </section>
+
+      {/* Similar Books */}
+      {tagCounts.length > 0 ? <SimilarBooks bookId={bookId} /> : null}
 
       {/* Rating distribution */}
       {stats ? (

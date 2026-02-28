@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import {
   getUserShelves,
   getBookShelfEntry,
@@ -9,6 +10,7 @@ import {
 
 export function useUserShelves() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [shelves, setShelves] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -19,11 +21,11 @@ export function useUserShelves() {
       const data = await getUserShelves(user.id);
       setShelves(data);
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load shelves", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, addToast]);
 
   useEffect(() => {
     refresh();
@@ -36,6 +38,7 @@ export function useUserShelves() {
 
 export function useBookShelfStatus(bookId) {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [entry, setEntry] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -58,14 +61,23 @@ export function useBookShelfStatus(bookId) {
 
   const setShelf = async (shelf) => {
     if (!user) return;
-    await setBookShelf(user.id, bookId, shelf);
-    await refresh();
+    try {
+      await setBookShelf(user.id, bookId, shelf);
+      addToast({ message: "Shelf updated!", type: "success" });
+      await refresh();
+    } catch (err) {
+      addToast({ message: err.message || "Failed to update shelf", type: "error" });
+    }
   };
 
   const remove = async () => {
     if (!user) return;
-    await removeFromShelf(user.id, bookId);
-    setEntry(null);
+    try {
+      await removeFromShelf(user.id, bookId);
+      setEntry(null);
+    } catch (err) {
+      addToast({ message: err.message || "Failed to remove from shelf", type: "error" });
+    }
   };
 
   return { entry, loading, setShelf, remove, refresh };

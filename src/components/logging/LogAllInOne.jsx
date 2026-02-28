@@ -1,15 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RatingInput from "../ratings/RatingInput";
 import TagSection from "../tags/TagSection";
+import TagBadge from "../tags/TagBadge";
 import { useAuth } from "../../context/AuthContext";
 import { useCreateBookLog } from "../../hooks/useBookLog";
 import useBookTags from "../../hooks/useBookTags";
+import { getPopularTagsForBook } from "../../services/tags";
 import { VISIBILITY_OPTIONS } from "../../utils/constants";
 
 function LogAllInOne({ book, onSubmit }) {
   const { user } = useAuth();
   const { submit, submitting } = useCreateBookLog();
   const { tagCounts, userVotes, officialTags, toggleVote } = useBookTags(book.id);
+  const [popularTags, setPopularTags] = useState([]);
 
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
@@ -18,6 +21,12 @@ function LogAllInOne({ book, onSubmit }) {
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [visibility, setVisibility] = useState("public");
   const [isReread, setIsReread] = useState(false);
+
+  useEffect(() => {
+    if (book.id) {
+      getPopularTagsForBook(book.id, 10).then(setPopularTags);
+    }
+  }, [book.id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -65,6 +74,26 @@ function LogAllInOne({ book, onSubmit }) {
 
       <div className="log-field">
         <label className="log-label">Community Tags</label>
+        {popularTags.length > 0 ? (
+          <div className="tag-suggestions">
+            <div className="tag-suggestions-label">Popular for this book</div>
+            <div className="tag-list">
+              {popularTags.map((pt) => {
+                const officialTag = officialTags.find((t) => t.id === pt.tag_id);
+                if (!officialTag) return null;
+                return (
+                  <TagBadge
+                    key={pt.tag_id}
+                    tag={officialTag}
+                    count={pt.vote_count}
+                    voted={userVotes.includes(pt.tag_id)}
+                    onClick={() => toggleVote(pt.tag_id)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
         <TagSection
           tagCounts={tagCounts}
           officialTags={officialTags}

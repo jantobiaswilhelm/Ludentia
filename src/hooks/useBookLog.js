@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import { createBookLog, getUserLogs, getBookLogs, getBookRatingStats } from "../services/bookLog";
 import { setBookShelf } from "../services/bookshelves";
 
 export function useUserBookLogs() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -14,11 +16,11 @@ export function useUserBookLogs() {
     try {
       setLogs(await getUserLogs(user.id));
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load logs", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, addToast]);
 
   useEffect(() => {
     refresh();
@@ -28,6 +30,7 @@ export function useUserBookLogs() {
 }
 
 export function useBookReviews(bookId) {
+  const { addToast } = useToast();
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -40,11 +43,11 @@ export function useBookReviews(bookId) {
       setLogs(l);
       setStats(s);
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load reviews", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [bookId]);
+  }, [bookId, addToast]);
 
   useEffect(() => {
     refresh();
@@ -55,6 +58,7 @@ export function useBookReviews(bookId) {
 
 export function useCreateBookLog() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async (logData) => {
@@ -64,7 +68,11 @@ export function useCreateBookLog() {
       const log = await createBookLog({ ...logData, user_id: user.id });
       // Also add to "read" shelf
       await setBookShelf(user.id, logData.book_id, "read").catch(() => {});
+      addToast({ message: "Book logged successfully!", type: "success" });
       return log;
+    } catch (err) {
+      addToast({ message: err.message || "Failed to log book", type: "error" });
+      throw err;
     } finally {
       setSubmitting(false);
     }

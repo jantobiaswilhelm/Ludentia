@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RatingInput from "../ratings/RatingInput";
 import TagBadge from "../tags/TagBadge";
 import { useCreateBookLog } from "../../hooks/useBookLog";
 import useBookTags from "../../hooks/useBookTags";
+import { getPopularTagsForBook } from "../../services/tags";
 import { VISIBILITY_OPTIONS } from "../../utils/constants";
 
 const STEPS = [
@@ -30,6 +31,13 @@ function LogStepByStep({ book, onSubmit }) {
   const [reviewText, setReviewText] = useState("");
   const [visibility, setVisibility] = useState("public");
   const [containsSpoilers, setContainsSpoilers] = useState(false);
+  const [popularTags, setPopularTags] = useState([]);
+
+  useEffect(() => {
+    if (book.id) {
+      getPopularTagsForBook(book.id, 15).then(setPopularTags);
+    }
+  }, [book.id]);
 
   const currentStep = STEPS[step];
 
@@ -38,6 +46,13 @@ function LogStepByStep({ book, onSubmit }) {
     if (!cats) return [];
     const catArr = Array.isArray(cats) ? cats : [cats];
     return officialTags.filter((t) => catArr.includes(t.category));
+  };
+
+  const getSuggestedTagsForStep = (stepKey) => {
+    const cats = STEP_CATEGORIES[stepKey];
+    if (!cats) return [];
+    const catArr = Array.isArray(cats) ? cats : [cats];
+    return popularTags.filter((t) => catArr.includes(t.category));
   };
 
   const countMap = {};
@@ -106,18 +121,42 @@ function LogStepByStep({ book, onSubmit }) {
 
     // Tag steps
     const tags = getTagsForStep(currentStep.key);
+    const suggested = getSuggestedTagsForStep(currentStep.key);
+
     return (
-      <div className="tag-list">
-        {tags.map((tag) => (
-          <TagBadge
-            key={tag.id}
-            tag={tag}
-            count={countMap[tag.id] || 0}
-            voted={userVotes.includes(tag.id)}
-            onClick={() => toggleVote(tag.id)}
-          />
-        ))}
-      </div>
+      <>
+        {suggested.length > 0 ? (
+          <div className="tag-suggestions">
+            <div className="tag-suggestions-label">Suggested by readers</div>
+            <div className="tag-list">
+              {suggested.map((st) => {
+                const officialTag = officialTags.find((t) => t.id === st.tag_id);
+                if (!officialTag) return null;
+                return (
+                  <TagBadge
+                    key={st.tag_id}
+                    tag={officialTag}
+                    count={st.vote_count}
+                    voted={userVotes.includes(st.tag_id)}
+                    onClick={() => toggleVote(st.tag_id)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+        <div className="tag-list">
+          {tags.map((tag) => (
+            <TagBadge
+              key={tag.id}
+              tag={tag}
+              count={countMap[tag.id] || 0}
+              voted={userVotes.includes(tag.id)}
+              onClick={() => toggleVote(tag.id)}
+            />
+          ))}
+        </div>
+      </>
     );
   };
 

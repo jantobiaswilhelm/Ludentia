@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
-import { getAllTags, getBookTagCounts } from "../services/tags";
+import { getAllTags } from "../services/tags";
 import { supabase } from "../config/supabaseClient";
 import BookGrid from "../components/books/BookGrid";
-import Spinner from "../components/ui/Spinner";
+import GuidedDiscovery from "../components/discovery/GuidedDiscovery";
+import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 import { TAG_COLORS } from "../utils/constants";
 
 function BrowsePage() {
+  const [mode, setMode] = useState("guided");
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(null);
   const [books, setBooks] = useState([]);
@@ -33,7 +35,6 @@ function BrowsePage() {
         for (const row of data || []) {
           if (row.books && !seen.has(row.book_id)) {
             seen.add(row.book_id);
-            // Normalize for BookCard compatibility
             unique.push({
               id: row.books.id,
               title: row.books.title,
@@ -62,51 +63,74 @@ function BrowsePage() {
     <div className="browse-page">
       <h1>Browse by Tag</h1>
 
-      {tagsLoading ? (
-        <Spinner size={32} />
-      ) : (
-        <div className="browse-tags">
-          {Object.entries(categories).map(([category, catTags]) => (
-            <div key={category} className="browse-tag-group">
-              <h3>{category}</h3>
-              <div className="tag-list">
-                {catTags.map((tag) => {
-                  const colors = TAG_COLORS[tag.color] || TAG_COLORS.gray;
-                  const active = selectedTag?.id === tag.id;
-                  return (
-                    <button
-                      key={tag.id}
-                      type="button"
-                      className={`tag-badge ${active ? "tag-voted" : ""}`}
-                      style={{
-                        "--tag-bg": active ? colors.border : colors.bg,
-                        "--tag-text": colors.text,
-                        "--tag-border": colors.border,
-                      }}
-                      onClick={() => setSelectedTag(active ? null : tag)}
-                    >
-                      {tag.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="browse-mode-toggle">
+        <button
+          type="button"
+          className={`browse-mode-btn ${mode === "guided" ? "active" : ""}`}
+          onClick={() => setMode("guided")}
+        >
+          Guided
+        </button>
+        <button
+          type="button"
+          className={`browse-mode-btn ${mode === "quick" ? "active" : ""}`}
+          onClick={() => setMode("quick")}
+        >
+          Quick Filter
+        </button>
+      </div>
 
-      {selectedTag ? (
-        <div className="browse-results">
-          <h2>Books tagged "{selectedTag.label}"</h2>
-          {loading ? (
-            <Spinner size={32} />
-          ) : books.length === 0 ? (
-            <EmptyState title="No books yet" description="Be the first to tag a book with this!" />
+      {mode === "guided" ? (
+        <GuidedDiscovery />
+      ) : (
+        <>
+          {tagsLoading ? (
+            <SkeletonBookGrid count={4} />
           ) : (
-            <BookGrid books={books} />
+            <div className="browse-tags">
+              {Object.entries(categories).map(([category, catTags]) => (
+                <div key={category} className="browse-tag-group">
+                  <h3>{category}</h3>
+                  <div className="tag-list">
+                    {catTags.map((tag) => {
+                      const colors = TAG_COLORS[tag.color] || TAG_COLORS.gray;
+                      const active = selectedTag?.id === tag.id;
+                      return (
+                        <button
+                          key={tag.id}
+                          type="button"
+                          className={`tag-badge ${active ? "tag-voted" : ""}`}
+                          style={{
+                            "--tag-bg": active ? colors.border : colors.bg,
+                            "--tag-text": colors.text,
+                            "--tag-border": colors.border,
+                          }}
+                          onClick={() => setSelectedTag(active ? null : tag)}
+                        >
+                          {tag.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
-        </div>
-      ) : null}
+
+          {selectedTag ? (
+            <div className="browse-results">
+              <h2>Books tagged "{selectedTag.label}"</h2>
+              {loading ? (
+                <SkeletonBookGrid count={6} />
+              ) : books.length === 0 ? (
+                <EmptyState title="No books yet" description="Be the first to tag a book with this!" />
+              ) : (
+                <BookGrid books={books} />
+              )}
+            </div>
+          ) : null}
+        </>
+      )}
     </div>
   );
 }

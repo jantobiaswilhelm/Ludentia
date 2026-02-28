@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import {
   getBookTagCounts,
   getUserBookVotes,
@@ -10,6 +11,7 @@ import {
 
 export default function useBookTags(bookId) {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [tagCounts, setTagCounts] = useState([]);
   const [userVotes, setUserVotes] = useState([]);
   const [officialTags, setOfficialTags] = useState([]);
@@ -30,11 +32,11 @@ export default function useBookTags(bookId) {
         setUserVotes(votes);
       }
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load tags", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [bookId, user]);
+  }, [bookId, user, addToast]);
 
   useEffect(() => {
     refresh();
@@ -42,12 +44,16 @@ export default function useBookTags(bookId) {
 
   const toggleVote = async (tagId) => {
     if (!user || !bookId) return;
-    if (userVotes.includes(tagId)) {
-      await removeVote(user.id, bookId, tagId);
-    } else {
-      await voteTag(user.id, bookId, tagId);
+    try {
+      if (userVotes.includes(tagId)) {
+        await removeVote(user.id, bookId, tagId);
+      } else {
+        await voteTag(user.id, bookId, tagId);
+      }
+      await refresh();
+    } catch (err) {
+      addToast({ message: err.message || "Failed to update vote", type: "error" });
     }
-    await refresh();
   };
 
   return { tagCounts, userVotes, officialTags, loading, toggleVote, refresh };

@@ -41,6 +41,18 @@ export async function setBookShelf(userId, bookId, shelf) {
   return data;
 }
 
+export async function getCurrentlyReading(userId) {
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("user_bookshelves")
+    .select("*, books(*)")
+    .eq("user_id", userId)
+    .eq("shelf", "reading")
+    .order("added_at", { ascending: false });
+  if (error) return [];
+  return data || [];
+}
+
 export async function removeFromShelf(userId, bookId) {
   if (!supabase) throw new Error("Supabase not configured");
   const { error } = await supabase

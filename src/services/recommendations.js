@@ -22,6 +22,7 @@ export async function getRecommendations(userId, limit = 20) {
   return data.map((rec) => ({
     ...rec,
     book: (books || []).find((b) => b.id === rec.book_id),
+    reason: rec.reason || null,
   }));
 }
 
@@ -48,6 +49,48 @@ export async function getTrendingBooks(limit = 12) {
     .slice(0, limit)
     .map((c) => c.book)
     .filter(Boolean);
+}
+
+export async function getSimilarBooks(bookId, limit = 8) {
+  if (!supabase) return [];
+  const { data, error } = await supabase.rpc("get_similar_books", {
+    p_book_id: bookId,
+    p_limit: limit,
+  });
+  if (error) {
+    console.error("Similar books failed:", error);
+    return [];
+  }
+  if (!data || data.length === 0) return [];
+
+  const bookIds = data.map((r) => r.book_id);
+  const { data: books } = await supabase
+    .from("books")
+    .select("*")
+    .in("id", bookIds);
+
+  // Also fetch tag labels for shared tags
+  const allTagIds = [...new Set(data.flatMap((r) => r.shared_tag_ids))];
+  const { data: tagDefs } = await supabase
+    .from("tag_definitions")
+    .select("id, label, slug")
+    .in("id", allTagIds);
+  const tagMap = {};
+  for (const td of tagDefs || []) tagMap[td.id] = td;
+
+  return data.map((rec) => {
+    const book = (books || []).find((b) => b.id === rec.book_id);
+    if (!book) return null;
+    return {
+      id: book.id,
+      title: book.title,
+      authors: book.authors || [],
+      coverUrl: book.cover_url,
+      coverUrlLarge: book.cover_url_large,
+      sharedTags: (rec.shared_tag_ids || []).map((id) => tagMap[id]).filter(Boolean),
+      sharedTagIds: rec.shared_tag_ids,
+    };
+  }).filter(Boolean);
 }
 
 export async function getHighlyRatedBooks(limit = 12) {

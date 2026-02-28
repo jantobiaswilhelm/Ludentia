@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useUserShelves } from "../hooks/useBookshelf";
 import ShelfList from "../components/shelves/ShelfList";
 import EmptyState from "../components/ui/EmptyState";
-import Spinner from "../components/ui/Spinner";
+import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import { SHELVES, SHELF_ORDER } from "../utils/constants";
 import { Link } from "react-router-dom";
 
@@ -14,8 +14,9 @@ function MyShelfPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="page-center">
-        <Spinner size={40} />
+      <div className="shelf-page">
+        <h1>My Shelf</h1>
+        <SkeletonBookGrid count={8} />
       </div>
     );
   }

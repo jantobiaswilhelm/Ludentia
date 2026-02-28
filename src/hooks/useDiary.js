@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 import {
   getUserDiaryEntries,
   getBookDiaryEntries,
@@ -11,6 +12,7 @@ import {
 
 export function useUserDiary() {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -20,11 +22,11 @@ export function useUserDiary() {
     try {
       setEntries(await getUserDiaryEntries(user.id));
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load diary", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, addToast]);
 
   useEffect(() => {
     refresh();
@@ -35,6 +37,7 @@ export function useUserDiary() {
 
 export function useBookDiary(bookId) {
   const { user } = useAuth();
+  const { addToast } = useToast();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,11 +47,11 @@ export function useBookDiary(bookId) {
     try {
       setEntries(await getBookDiaryEntries(bookId));
     } catch (err) {
-      console.error(err);
+      addToast({ message: err.message || "Failed to load diary entries", type: "error" });
     } finally {
       setLoading(false);
     }
-  }, [bookId]);
+  }, [bookId, addToast]);
 
   useEffect(() => {
     refresh();

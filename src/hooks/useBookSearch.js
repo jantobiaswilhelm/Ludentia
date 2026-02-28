@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../context/ToastContext";
 import { searchBooks } from "../services/bookApi";
 
 const SEARCH_DEBOUNCE_MS = 400;
 
 export default function useBookSearch(query, language = "") {
+  const { addToast } = useToast();
   const [books, setBooks] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,12 +35,13 @@ export default function useBookSearch(query, language = "") {
         }
       } catch (requestError) {
         if (!isCancelled) {
-          setError(
+          const msg =
             requestError instanceof Error
               ? requestError.message
-              : "Failed to search books."
-          );
+              : "Failed to search books.";
+          setError(msg);
           setBooks([]);
+          addToast({ message: msg, type: "error" });
         }
       } finally {
         if (!isCancelled) {
@@ -51,7 +54,7 @@ export default function useBookSearch(query, language = "") {
       isCancelled = true;
       clearTimeout(timeoutId);
     };
-  }, [normalizedQuery, language]);
+  }, [normalizedQuery, language, addToast]);
 
   return { books, isLoading, error, hasQuery: normalizedQuery.length >= 2 };
 }

@@ -13,7 +13,6 @@ function Navbar() {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [theme, setTheme] = useState(getInitialTheme);
-  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -32,25 +31,15 @@ function Navbar() {
       <div className="nav-inner">
         <Link to="/" className="brand-mark">Ludentia</Link>
 
-        <button
-          className="nav-hamburger"
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle navigation"
-        >
-          <span />
-          <span />
-          <span />
-        </button>
-
-        <nav className={`nav-links ${menuOpen ? "nav-open" : ""}`} aria-label="Main">
-          <NavLink to="/" end onClick={() => setMenuOpen(false)}>Discover</NavLink>
-          <NavLink to="/browse" onClick={() => setMenuOpen(false)}>Browse</NavLink>
+        <nav className="nav-links" aria-label="Main">
+          <NavLink to="/" end>Discover</NavLink>
+          <NavLink to="/browse">Browse</NavLink>
           {user ? (
             <>
-              <NavLink to="/shelf" onClick={() => setMenuOpen(false)}>My Shelf</NavLink>
-              <NavLink to="/diary" onClick={() => setMenuOpen(false)}>Diary</NavLink>
-              <NavLink to="/recommendations" onClick={() => setMenuOpen(false)}>For You</NavLink>
-              <NavLink to="/profile" onClick={() => setMenuOpen(false)}>
+              <NavLink to="/shelf">My Shelf</NavLink>
+              <NavLink to="/diary">Diary</NavLink>
+              <NavLink to="/recommendations">For You</NavLink>
+              <NavLink to="/profile">
                 {profile?.display_name || profile?.username || "Profile"}
               </NavLink>
               <button type="button" className="nav-sign-out" onClick={handleSignOut}>
@@ -58,7 +47,7 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <NavLink to="/login" onClick={() => setMenuOpen(false)}>Sign In</NavLink>
+            <NavLink to="/login">Sign In</NavLink>
           )}
           <button
             type="button"
@@ -66,9 +55,19 @@ function Navbar() {
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
-            {theme === "dark" ? "☀️" : "🌙"}
+            {theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19"}
           </button>
         </nav>
+
+        {/* Mobile: only show theme toggle beside logo (nav handled by bottom tab bar) */}
+        <button
+          type="button"
+          className="theme-toggle nav-mobile-theme"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          {theme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19"}
+        </button>
       </div>
     </header>
   );

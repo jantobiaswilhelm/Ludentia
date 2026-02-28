@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getRecommendations } from "../services/recommendations";
-import BookGrid from "../components/books/BookGrid";
-import Spinner from "../components/ui/Spinner";
+import RecommendationCard from "../components/books/RecommendationCard";
+import { SkeletonBookGrid } from "../components/ui/Skeleton";
 import EmptyState from "../components/ui/EmptyState";
 
 function RecommendationsPage() {
@@ -28,6 +28,7 @@ function RecommendationsPage() {
               pageCount: r.book.page_count,
               averageRating: r.book.google_average_rating,
               score: r.score,
+              reason: r.reason,
             }))
         );
       })
@@ -35,11 +36,7 @@ function RecommendationsPage() {
   }, [user]);
 
   if (authLoading) {
-    return (
-      <div className="page-center">
-        <Spinner size={40} />
-      </div>
-    );
+    return <SkeletonBookGrid count={8} />;
   }
 
   if (!user) {
@@ -58,9 +55,7 @@ function RecommendationsPage() {
       <p className="page-subtitle">Based on your ratings, tags, and reading history.</p>
 
       {loading ? (
-        <div className="page-center">
-          <Spinner size={40} />
-        </div>
+        <SkeletonBookGrid count={8} />
       ) : recs.length === 0 ? (
         <EmptyState
           title="Not enough data yet"
@@ -68,7 +63,11 @@ function RecommendationsPage() {
           action={<Link to="/" className="btn btn-primary">Discover Books</Link>}
         />
       ) : (
-        <BookGrid books={recs} />
+        <div className="rec-grid">
+          {recs.map((rec) => (
+            <RecommendationCard key={rec.id} book={rec} reason={rec.reason} />
+          ))}
+        </div>
       )}
     </div>
   );
