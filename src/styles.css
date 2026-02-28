@@ -300,33 +300,147 @@ h3 { font-size: 1.1rem; font-weight: 600; }
   color: var(--primary);
 }
 
-.home-tags {
-  display: grid;
-  gap: 0.5rem;
-}
-
-.home-tags-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
 .home-section {
-  margin-top: var(--space-md);
+  margin-top: var(--space-lg);
 }
 
 .home-section h2 {
   margin-bottom: var(--space-md);
 }
 
-.home-see-all {
-  margin-top: 0.75rem;
+.home-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-md);
+}
+
+.home-section-header h2 {
+  margin-bottom: 0;
 }
 
 .home-greeting {
   font-size: 1.1rem;
   font-weight: 500;
   color: var(--text-secondary);
+}
+
+/* Guide hero (Guided Discovery on homepage) */
+.home-guide-hero {
+  margin-top: var(--space-md);
+}
+
+.home-guide-wrapper {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  box-shadow: var(--shadow);
+}
+
+/* Recommendations empty state */
+.home-recs-empty {
+  text-align: center;
+  padding: var(--space-lg);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  border: 1px dashed var(--border);
+}
+
+.home-recs-empty p {
+  color: var(--text-secondary);
+}
+
+/* Quick tags */
+.home-quick-tags {
+  margin-top: var(--space-md);
+}
+
+.home-quick-tags-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.mood-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.mood-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-decoration: none;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  border: 1.5px solid var(--pill-border);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mood-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mood-pills-large .mood-pill {
+  padding: 0.6rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+
+/* CTA section */
+.home-cta {
+  text-align: center;
+}
+
+.home-cta .muted-text {
+  margin-bottom: 1rem;
+}
+
+/* Search section (secondary, collapsible) */
+.home-search-section {
+  margin-top: var(--space-xl);
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--space-md);
+}
+
+.home-search-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.6rem 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.home-search-toggle:hover {
+  color: var(--text);
+}
+
+.home-search-chevron {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.home-search-toggle.open .home-search-chevron {
+  transform: rotate(180deg);
+}
+
+.home-search-body {
+  margin-top: var(--space-sm);
 }
 
 /* --- Search --- */

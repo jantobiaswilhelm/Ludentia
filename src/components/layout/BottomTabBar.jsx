@@ -39,32 +39,18 @@ function BottomTabBar() {
             </svg>
             <span>Shelf</span>
           </NavLink>
-        ) : (
-          <NavLink to="/login" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M3 3h4v14H3zM8 3h4v14H8zM13 5l4-1v13l-4 1z" />
-            </svg>
-            <span>Sign In</span>
-          </NavLink>
-        )}
+        ) : null}
 
-        {user ? (
-          <NavLink to="/profile" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="10" cy="7" r="3.5" />
-              <path d="M3.5 17.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5" />
-            </svg>
-            <span>Profile</span>
-          </NavLink>
-        ) : (
-          <NavLink to="/login" className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}>
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="10" cy="7" r="3.5" />
-              <path d="M3.5 17.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5" />
-            </svg>
-            <span>Sign In</span>
-          </NavLink>
-        )}
+        <NavLink
+          to={user ? "/profile" : "/login"}
+          className={({ isActive }) => `bottom-tab ${isActive ? "tab-active" : ""}`}
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="10" cy="7" r="3.5" />
+            <path d="M3.5 17.5c0-3.5 3-5.5 6.5-5.5s6.5 2 6.5 5.5" />
+          </svg>
+          <span>{user ? "Profile" : "Sign In"}</span>
+        </NavLink>
       </div>
     </nav>
   );

@@ -33,12 +33,11 @@ function Navbar() {
 
         <nav className="nav-links" aria-label="Main">
           <NavLink to="/" end>Discover</NavLink>
-          <NavLink to="/browse">Browse</NavLink>
           {user ? (
             <>
+              <NavLink to="/feed">Feed</NavLink>
               <NavLink to="/shelf">My Shelf</NavLink>
               <NavLink to="/diary">Diary</NavLink>
-              <NavLink to="/recommendations">For You</NavLink>
               <NavLink to="/profile">
                 {profile?.display_name || profile?.username || "Profile"}
               </NavLink>
@@ -47,7 +46,10 @@ function Navbar() {
               </button>
             </>
           ) : (
-            <NavLink to="/login">Sign In</NavLink>
+            <>
+              <NavLink to="/browse">Browse</NavLink>
+              <NavLink to="/login">Sign In</NavLink>
+            </>
           )}
           <button
             type="button"

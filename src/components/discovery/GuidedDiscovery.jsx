@@ -7,6 +7,7 @@ import { SkeletonBookGrid } from "../ui/Skeleton";
 const STEP_CATEGORIES = [
   { key: "mood", label: "How do you want to feel?", category: "Mood", required: true },
   { key: "pacing", label: "What pacing are you in the mood for?", category: "Pacing", required: true },
+  { key: "themes", label: "Any themes you love?", category: "Themes", required: true },
 ];
 
 const OPTIONAL_CATEGORIES = [

@@ -118,6 +118,14 @@ Creates `import_jobs` table to track Goodreads/CSV imports (user_id, source, sta
 supabase/migrations/029_import_jobs.sql
 ```
 
+## Tag System Expansion
+
+### 19. `030_theme_tags.sql`
+Adds 15 official "Themes" category tags (Enemies to Lovers, Found Family, Unreliable Narrator, Redemption Arc, Coming of Age, Fish Out of Water, Quest/Journey, Forbidden Love, Revenge, Identity/Self-Discovery, Time Loop, Morally Gray Characters, Chosen One, Secrets & Lies, Survival).
+```
+supabase/migrations/030_theme_tags.sql
+```
+
 ## How to run
 
 **Option A — Supabase Dashboard:**
